@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<nav class="tabs">
+  <a href="#compare">Compare cities</a>
+  <a href="#predict">Predict temperature</a>
+</nav>
+
+<section class="card" id="compare">
+  <h1>Compare two cities</h1>
+  <form method="post" action="{{ url_for('compare') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-row">
+      <label>First city <input name="city_a" required maxlength="80" placeholder="San Jose"></label>
+      <label>Second city <input name="city_b" required maxlength="80" placeholder="Seattle"></label>
+      <label>Time range
+        <select name="years">
+          {% for y in compare_years %}<option value="{{ y }}" {% if y == 2 %}selected{% endif %}>
+            Last {{ y }} year{{ 's' if y > 1 }}</option>{% endfor %}
+        </select>
+      </label>
+      <div><button>Compare</button></div>
+    </div>
+  </form>
+  <h2 style="margin-top:1.25rem">Your comparisons</h2>
+  {% if comparisons %}
+  <div class="scroll"><table>
+    <thead><tr><th>Cities</th><th>Period</th><th>Created (UTC)</th><th></th></tr></thead>
+    <tbody>
+    {% for c in comparisons %}
+      <tr>
+        <td>{{ c.city_a }} vs. {{ c.city_b }}</td>
+        <td>{{ c.start_date }} to {{ c.end_date }}</td>
+        <td>{{ c.created_at[:16].replace('T', ' ') }}</td>
+        <td><a href="{{ url_for('comparison', cid=c.id) }}">Open</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+  <p class="muted">No comparisons yet.</p>
+  {% endif %}
+</section>
+
+<section class="card" id="predict">
+  <h1>Predict next-day high temperature</h1>
+  <p class="muted">The app downloads a city's daily weather history, trains Linear Regression
+     and Random Forest models, and tests them against two simple baselines.</p>
+  <form method="post" action="{{ url_for('predict') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-row">
+      <label>City <input name="city" required maxlength="80" placeholder="San Jose"></label>
+      <label>History
+        <select name="years">
+          {% for y in predict_years %}<option value="{{ y }}" {% if y == 3 %}selected{% endif %}>
+            {{ y }} years</option>{% endfor %}
+        </select>
+      </label>
+      <div><button>Train models</button></div>
+    </div>
+  </form>
+  <h2 style="margin-top:1.25rem">Your prediction runs</h2>
+  {% if runs %}
+  <div class="scroll"><table>
+    <thead><tr><th>City</th><th>History</th><th>Best model</th><th>Error</th>
+      <th>Baseline error</th><th>Created (UTC)</th><th></th></tr></thead>
+    <tbody>
+    {% for r in runs %}
+      <tr>
+        <td>{{ r.city }}</td>
+        <td>{{ r.years }} years</td>
+        <td>{{ r.best_model }}</td>
+        <td>{{ r.best_mae|fmt }} F</td>
+        <td>{{ r.baseline_mae|fmt }} F</td>
+        <td>{{ r.created_at[:16].replace('T', ' ') }}</td>
+        <td><a href="{{ url_for('run', rid=r.id) }}">Open</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+  <p class="muted">No prediction runs yet.</p>
+  {% endif %}
+</section>
+<p class="note">Data from the free Open-Meteo historical weather archive (CC BY 4.0).
+   Fetching and training take a few seconds.</p>
+{% endblock %}

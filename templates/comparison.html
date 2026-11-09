@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ c.city_a }} vs. {{ c.city_b }}{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('dashboard') }}">&larr; Dashboard</a></p>
+<section class="card">
+  <h1>{{ c.city_a }} vs. {{ c.city_b }}</h1>
+  <p class="muted">{{ c.start_date }} to {{ c.end_date }}</p>
+  <ul>{% for t in takeaways %}<li>{{ t }}</li>{% endfor %}</ul>
+  <div class="scroll"><table>
+    <thead><tr><th></th>{% for city in table %}<th>{{ city }}</th>{% endfor %}</tr></thead>
+    <tbody>
+    {% for m in metrics %}
+      <tr><td>{{ m }}</td>{% for city in table %}<td>{{ table[city][m] }}</td>{% endfor %}</tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  <div style="margin-top:1rem">
+    <a class="button" href="{{ url_for('download', cid=c.id) }}">Download data (CSV)</a>
+    <form method="post" action="{{ url_for('delete', cid=c.id) }}" class="inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="danger">Delete</button>
+    </form>
+  </div>
+</section>
+<section class="card">
+  <img class="chart" src="{{ url_for('chart', cid=c.id, chart='temperature') }}"
+       alt="Temperature comparison chart">
+</section>
+<section class="card">
+  <img class="chart" src="{{ url_for('chart', cid=c.id, chart='rainfall') }}"
+       alt="Monthly rainfall comparison chart">
+</section>
+<p class="note">Weather data by Open-Meteo.com (CC BY 4.0). Values are modeled grid data,
+   not official station records.</p>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ r.city }}{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('dashboard') }}">&larr; Dashboard</a></p>
+<section class="card">
+  <h1>{{ r.city }}</h1>
+  <p class="muted">{{ r.years }} years of history. Trained on {{ s.n_train|fmt }} days (to
+     {{ s.train_end }}), tested on {{ s.n_test|fmt }} days (from {{ s.test_start }}).</p>
+  <div class="metrics">
+    <div><span>Best model</span><strong>{{ s.best_model }}</strong></div>
+    <div><span>Average error</span><strong>{{ s.best_mae|fmt }} F</strong></div>
+    <div><span>vs. "same as today"</span>
+      <strong>{% if s.beat_baseline %}{{ s.improvement_pct }}% better{% else %}No better{% endif %}</strong></div>
+    <div><span>Predicted high for {{ s.next_date }}</span><strong>{{ s.next_high }} F</strong></div>
+  </div>
+  <p class="note">The archive runs about a week behind, so the "predicted high" is for the day
+     after the most recent available data, not necessarily tomorrow.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Method</th><th>MAE (F)</th><th>RMSE (F)</th><th>R&sup2;</th></tr></thead>
+    <tbody>
+    {% for row in s.rows %}
+      <tr><td>{{ row.method }}</td><td>{{ row.mae }}</td><td>{{ row.rmse }}</td>
+        <td>{{ row.r2 }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  <form method="post" action="{{ url_for('run_delete', rid=r.id) }}" style="margin-top:1rem">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="danger">Delete</button>
+  </form>
+</section>
+<section class="card">
+  <img class="chart" src="{{ url_for('run_chart', rid=r.id, chart='predictions') }}"
+       alt="Predicted vs actual daily high">
+</section>
+<section class="card">
+  <img class="chart" src="{{ url_for('run_chart', rid=r.id, chart='importance') }}"
+       alt="Feature importance">
+</section>
+<p class="note">Weather data by Open-Meteo.com (CC BY 4.0). Values are modeled grid data,
+   not official station records.</p>
+{% endblock %}
