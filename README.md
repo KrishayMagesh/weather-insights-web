@@ -11,6 +11,17 @@ then:
   with two baselines ("same as today" and "monthly average"), and shows the error metrics,
   predicted vs. actual chart, feature importance, and a next-day prediction.
 
+## Screenshots
+<img src="screenshots/dashboard.png" width="700" alt="Dashboard">
+
+**Compare two cities** (San Ramon vs. Tracy, CA)
+<img src="screenshots/comparison.png" width="700" alt="Comparison table">
+<img src="screenshots/comparison_charts.png" width="700" alt="Comparison charts">
+
+**Predict next-day high temperature** (Toronto: Linear Regression was 13.7% more accurate than "same as today")
+<img src="screenshots/prediction.png" width="700" alt="Prediction results">
+<img src="screenshots/prediction_charts.png" width="700" alt="Prediction charts">
+
 Every comparison and prediction run is saved to the user's account in a SQLite database.
 
 ## Tech
